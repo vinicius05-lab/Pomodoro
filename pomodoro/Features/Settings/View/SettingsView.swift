@@ -9,7 +9,7 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 25) {
                 
                 Text("Tempo Pomodoro")
-                    .font(.system(size: 25))
+                    .font(.system(size: 20))
                     .bold()
                 
                 createTimeSelectionRow(
@@ -20,14 +20,14 @@ struct SettingsView: View {
                 
                 HStack {
                     Text("Ciclos de Pomodoro")
-                        .font(.system(size: 25))
+                        .font(.system(size: 20))
                         .bold()
                     Spacer()
                     CustomStepperView(value: $viewModel.pomodoroCycles)
                 }
                 
                 Text("Tempo de Descanso")
-                    .font(.system(size: 25))
+                    .font(.system(size: 20))
                     .bold()
                 
                 createTimeSelectionRow(
@@ -38,7 +38,7 @@ struct SettingsView: View {
                 
                 HStack {
                     Text("Som")
-                        .font(.system(size: 25))
+                        .font(.system(size: 20))
                         .bold()
              
                     Image(systemName:
@@ -58,7 +58,7 @@ struct SettingsView: View {
 
                 HStack {
                     Text("Modo Escuro")
-                        .font(.system(size: 25))
+                        .font(.system(size: 20))
                         .bold()
                     Spacer()
                     Toggle("", isOn: $viewModel.darkMode)
@@ -68,7 +68,7 @@ struct SettingsView: View {
                 
                 HStack {
                     Text("Vibrar")
-                        .font(.system(size: 25))
+                        .font(.system(size: 20))
                         .bold()
                     Spacer()
                     Toggle("", isOn: $viewModel.vibrate)
@@ -77,7 +77,7 @@ struct SettingsView: View {
                 
                 HStack {
                     Text("Som do Alarme")
-                        .font(.system(size: 25))
+                        .font(.system(size: 20))
                         .bold()
                     Spacer()
                     Menu {

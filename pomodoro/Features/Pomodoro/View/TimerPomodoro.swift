@@ -2,24 +2,17 @@ import SwiftUI
 
 struct TimerPomodoro: View {
     @StateObject private var viewModel: TimerViewModel
-    @EnvironmentObject var settingsViewModel: SettingsViewModel
     
-    init(minutes: Int = 30, seconds: Int = 0) {
-           _viewModel = StateObject(wrappedValue: TimerViewModel(minutes: minutes, seconds: seconds, settingsViewModel: SettingsViewModel()))
+    @EnvironmentObject var settingsViewModel: SettingsViewModel
+
+    init(minutes: Int = 30, seconds: Int = 0, settingsViewModel: SettingsViewModel) {
+        _viewModel = StateObject(wrappedValue: TimerViewModel(minutes: minutes, seconds: seconds, settingsViewModel: settingsViewModel))
     }
+
     
     var body: some View {
         NavigationStack {
             VStack {
-                /*HStack {
-                    Text("Pomodoro")
-                        .font(.system(size: 25, weight: .bold))
-                        .foregroundColor(.black)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.top, 10)
-                .padding(.bottom, 10)*/
-                
                 ZStack {
                     Circle()
                         .stroke(Color.gray.opacity(0.2), lineWidth: 20)
@@ -28,7 +21,9 @@ struct TimerPomodoro: View {
                     Circle()
                         .trim(from: CGFloat(viewModel.timeElapsed) / CGFloat(viewModel.totalTime), to: 1)
                         .stroke(
-                            viewModel.isPomodoro ? .vermelhoPadrao: .green,
+                            viewModel.isPomodoro ? .vermelhoPadrao:
+                                !viewModel.isPomodoro && settingsViewModel.darkMode ? .orange:
+                                    .green,
                             style: StrokeStyle(lineWidth: 20, lineCap: .round)
                         )
                         .rotationEffect(.degrees(-90))
@@ -40,7 +35,6 @@ struct TimerPomodoro: View {
                         .bold()
                 }
                 .padding(.top, -100)
-                //.padding()
                 
                 CycleIndicatorView(currentCycle: $viewModel.currentCycle, totalCycles: $viewModel.totalCycles)
                 
@@ -110,6 +104,21 @@ struct TimerPomodoro: View {
             .onChange(of: settingsViewModel.pomodoroCycles) { _, newValue in
                 viewModel.totalCycles = newValue
             }
+            .alert("Tempo de foco acabou!", isPresented: $viewModel.showAlert) {
+                Button("Ok") {
+                    viewModel.startRestTime() // Inicia o tempo de descanso após o usuário confirmar
+                }
+            } message: {
+                Text("Agora é hora de descansar.")
+            }
+            .alert("Tempo de descanso acabou!", isPresented: $viewModel.isRestTimeAlert) {
+                Button("Ok") {
+                    viewModel.startPomodoro() // Inicia o Pomodoro após o usuário confirmar
+                }
+            } message: {
+                Text("Agora é hora de focar novamente.")
+            }
+            
             .toolbar { // 🔹 Adicionando a Toolbar
                 ToolbarItem(placement: .principal) {
                     Text("Pomodoro")
@@ -123,6 +132,6 @@ struct TimerPomodoro: View {
 }
 
 #Preview {
-    TimerPomodoro()
+    TimerPomodoro(settingsViewModel: SettingsViewModel())
         .environmentObject(SettingsViewModel())
 }

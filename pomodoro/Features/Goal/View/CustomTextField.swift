@@ -7,7 +7,7 @@ struct CustomTextField: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             Text(title)
-                .font(.headline)
+                .font(.system(size: 20))
                 .bold()
 
             TextField("", text: $text)
@@ -19,6 +19,7 @@ struct CustomTextField: View {
                 )
                 .padding(10)
                 .shadow(color: Color.gray.opacity(0.3), radius: 2, x: 0, y: 2)
+            
         }
     }
 }

@@ -2,7 +2,7 @@ import SwiftUI
 
 struct TabBarView: View {
     @StateObject private var settingsViewModel = SettingsViewModel() // Cria a instância do ViewModel
-
+    
     init() {
         // Define a aparência da TabBar
         let appearance = UITabBarAppearance()
@@ -15,15 +15,18 @@ struct TabBarView: View {
     }
 
     var body: some View {
-        TabView {
-            TimerPomodoro()
+        TabView () {
+            
+            TimerPomodoro(settingsViewModel: settingsViewModel)
                 .tabItem {
                     Label("Pomodoro", systemImage: "play.circle.fill")
                 }
+            
             SettingsView()
                 .tabItem {
                     Label("Configurações", systemImage: "gearshape.fill")
                 }
+            
             GoalView()
                 .tabItem {
                     Label("Metas", systemImage: "square.and.pencil")

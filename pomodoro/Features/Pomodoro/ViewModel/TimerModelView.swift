@@ -8,6 +8,8 @@ class TimerViewModel: ObservableObject {
     @Published var currentCycle: Int = 1
     @Published var isPomodoro: Bool = true
     @Published var totalCycles: Int
+    @Published var showAlert: Bool = false
+    @Published var isRestTimeAlert: Bool = false
     
     private var timer: Timer?
     private var settingsViewModel: SettingsViewModel
@@ -15,10 +17,11 @@ class TimerViewModel: ObservableObject {
     init(minutes: Int, seconds: Int, settingsViewModel: SettingsViewModel) {
         self.totalTime = (minutes * 60) + seconds
         self.settingsViewModel = settingsViewModel
-        self.totalCycles = settingsViewModel.pomodoroCycles // Definir ciclos com base na configuração
+        self.totalCycles = settingsViewModel.pomodoroCycles
     }
     
     func startTimer() {
+        timer?.invalidate()
         isRunning = true
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             guard let self = self else { return }
@@ -26,11 +29,11 @@ class TimerViewModel: ObservableObject {
             if self.timeElapsed < self.totalTime {
                 self.timeElapsed += 1
             } else {
-                self.switchMode() // Alternar entre Pomodoro e descanso automaticamente
+                self.switchMode()
             }
         }
     }
-    
+
     func pauseTimer() {
         isRunning = false
         timer?.invalidate()
@@ -40,32 +43,38 @@ class TimerViewModel: ObservableObject {
         timer?.invalidate()
         timeElapsed = 0
         isRunning = false
+        currentCycle = 1 // Reseta o ciclo ao reiniciar
+        isPomodoro = true // Inicia com Pomodoro
+        totalTime = (settingsViewModel.selectedPomodoroTime ?? 30) * 60
     }
     
     private func switchMode() {
-        let wasRunning = isRunning // Armazena o estado antes da troca
-
-        isPomodoro.toggle()
-        timeElapsed = 0
-
         if isPomodoro {
-            totalTime = (settingsViewModel.selectedPomodoroTime ?? 30) * 60
-            currentCycle += 1
-            if currentCycle > totalCycles {
-                currentCycle = 1
-            }
-            
+            showAlert = true
         } else {
-            totalTime = (settingsViewModel.selectedRestTime ?? 5) * 60
-        }
-
-        if wasRunning {
-            startTimer()
-        } else {
-            pauseTimer() // Garante que o botão de pausa continue funcionando no descanso
+            isRestTimeAlert = true
         }
     }
 
+    func startRestTime() {
+        isPomodoro = false
+        timeElapsed = 0
+        totalTime = (settingsViewModel.selectedRestTime ?? 5) * 60
+        startTimer()
+    }
+    
+    func startPomodoro() {
+        if currentCycle >= totalCycles {
+            resetTimer() // Se for o último ciclo, reseta tudo e para.
+            return
+        }
+        
+        isPomodoro = true
+        timeElapsed = 0
+        totalTime = (settingsViewModel.selectedPomodoroTime ?? 30) * 60
+        currentCycle += 1 // Incrementa o ciclo ao iniciar um novo Pomodoro
+        startTimer()
+    }
     
     func updateTime(minutes: Int) {
         totalTime = minutes * 60
