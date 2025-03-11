@@ -43,11 +43,24 @@ class TimerViewModel: ObservableObject {
         timer?.invalidate()
         timeElapsed = 0
         isRunning = false
-        currentCycle = 1 // Reseta o ciclo ao reiniciar
-        isPomodoro = true // Inicia com Pomodoro
-        totalTime = (settingsViewModel.selectedPomodoroTime ?? 30) * 60
+        
+        // Mantém o mesmo tempo do modo atual
+        if isPomodoro {
+            totalTime = (settingsViewModel.selectedPomodoroTime ?? 30) * 60
+        } else {
+            totalTime = (settingsViewModel.selectedRestTime ?? 5) * 60
+        }
     }
     
+    func resetAll() {
+        timer?.invalidate()
+        timeElapsed = 0
+        isRunning = false
+        currentCycle = 1 // ❌ Isso faz com que ele volte ao primeiro ciclo
+        isPomodoro = true // ❌ Isso sempre redefine para Pomodoro
+        totalTime = (settingsViewModel.selectedPomodoroTime ?? 30) * 60
+    }
+
     private func switchMode() {
         if isPomodoro {
             showAlert = true
@@ -65,7 +78,7 @@ class TimerViewModel: ObservableObject {
     
     func startPomodoro() {
         if currentCycle >= totalCycles {
-            resetTimer() // Se for o último ciclo, reseta tudo e para.
+            resetAll() // Se for o último ciclo, reseta tudo e para.
             return
         }
         
