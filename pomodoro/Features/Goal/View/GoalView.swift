@@ -112,6 +112,7 @@ struct GoalCreateView: View {
     @State private var descript: String = ""
     @State private var scheduledDate: Date = Date()
     @State private var isScheduled: Bool = false // Variável para controlar a caixa de seleção
+    @State private var showMessageTitleEmpty: Bool = false
     
     private let model = SettingsModel()
     @EnvironmentObject private var viewModel: SettingsViewModel
@@ -204,6 +205,11 @@ struct GoalCreateView: View {
                             goal.pomodoroCycles = viewModel.pomodoroCycles
                             
                         } else {
+                            if title.isEmpty {
+                                showMessageTitleEmpty = true
+                                return
+                            }
+                            
                             // Se o usuário optou por agendar, passa a data, caso contrário passa nil
                             let goalModel: GoalModel = GoalModel(
                                 title: title,
@@ -222,6 +228,11 @@ struct GoalCreateView: View {
                         Text("Salvar")
                     }
                 }
+            }
+            .alert("Título é obrigatório", isPresented: $showMessageTitleEmpty) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Por favor, preencha o título antes de salvar")
             }
         }
     }
