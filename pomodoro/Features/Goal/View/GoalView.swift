@@ -196,6 +196,11 @@ struct GoalCreateView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         
+                        if title.isEmpty {
+                            showMessageTitleEmpty = true
+                            return
+                        }
+                        
                         if let goal = goal {
                             goal.title = title
                             goal.descript = descript
