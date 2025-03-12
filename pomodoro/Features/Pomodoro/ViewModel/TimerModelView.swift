@@ -10,6 +10,7 @@ class TimerViewModel: ObservableObject {
     @Published var totalCycles: Int
     @Published var showAlert: Bool = false
     @Published var isRestTimeAlert: Bool = false
+    @Published var showResetConfirmation: Bool = false
     
     private var timer: Timer?
     private var settingsViewModel: SettingsViewModel

@@ -2,13 +2,12 @@ import SwiftUI
 
 struct TimerPomodoro: View {
     @StateObject private var viewModel: TimerViewModel
-    
+
     @EnvironmentObject var settingsViewModel: SettingsViewModel
 
     init(minutes: Int = 30, seconds: Int = 0, settingsViewModel: SettingsViewModel) {
         _viewModel = StateObject(wrappedValue: TimerViewModel(minutes: minutes, seconds: seconds, settingsViewModel: settingsViewModel))
     }
-
     
     var body: some View {
         NavigationStack {
@@ -53,7 +52,7 @@ struct TimerPomodoro: View {
                 HStack(spacing: 60) {
                     VStack {
                         Button(action: {
-                            viewModel.resetTimer()
+                            viewModel.showResetConfirmation = true // Exibe o alerta antes de reiniciar
                         }) {
                             ZStack {
                                 Circle()
@@ -70,6 +69,13 @@ struct TimerPomodoro: View {
                             .foregroundStyle(settingsViewModel.darkMode ? .white : .black)
                             .bold()
                     }
+                    .alert("Tem certeza que deseja reiniciar?", isPresented: $viewModel.showResetConfirmation) {
+                        Button("Cancelar", role: .cancel) {}
+                        Button("Sim", role: .destructive) {
+                            viewModel.resetTimer()
+                        }
+                    }
+
                     
                     VStack {
                         Button(action: {

@@ -7,6 +7,9 @@ struct GoalView: View {
     
     @EnvironmentObject private var settingsViewModel: SettingsViewModel
     @Binding var selectedTab: Int // Adicione um Binding para a aba ativa
+    
+    @State private var showDeleteConfirmation: Bool = false
+    @State private var goalToDelete: GoalModel?
 
     var body: some View {
         NavigationStack {
@@ -48,7 +51,8 @@ struct GoalView: View {
                                     
                                     HStack(spacing: 16) {
                                         Button(action: {
-                                            context.delete(goal)
+                                            showDeleteConfirmation = true
+                                            goalToDelete = goal
                                         }) {
                                             Image(systemName: "trash.circle")
                                                 .font(.system(size: 24))
@@ -83,6 +87,16 @@ struct GoalView: View {
                     NavigationLink(destination: GoalCreateView()) {
                         Image(systemName: "plus")
                     }
+                }
+            }
+        }
+        .alert("Tem certeza de que deseja deletar esta meta?", isPresented: $showDeleteConfirmation) {
+            Button("Cancelar", role: .cancel) {}
+            Button("Sim", role: .destructive) {
+                self.showDeleteConfirmation = true
+                if let goal = goalToDelete {
+                    context.delete(goal)
+                    try? context.save()
                 }
             }
         }
