@@ -2,32 +2,47 @@ import SwiftUI
 import SwiftData
 
 struct GoalView: View {
-    
     @Environment(\.modelContext) private var context
-    @Query private var goals: [GoalModel] = []
+    @Query var goals: [GoalModel]
     
+    @EnvironmentObject private var settingsViewModel: SettingsViewModel
+    @Binding var selectedTab: Int // Adicione um Binding para a aba ativa
+
     var body: some View {
         NavigationStack {
-            ScrollView { // Adicionando o ScrollView para rolar as metas
+            ScrollView {
                 VStack {
                     if goals.isEmpty {
-                        VStack {
-                            Text("Nenhuma meta cadastrada.")
-                                .foregroundColor(.secondary)
-                            
-                            Spacer()
-                        }
+                        Text("Nenhuma meta cadastrada.")
+                            .foregroundColor(.secondary)
                     } else {
                         ForEach(goals) { goal in
                             ZStack {
                                 RoundedRectangle(cornerRadius: 10)
                                     .frame(width: 363, height: 47)
-                                    .foregroundColor(Color.vermelhoPadrao)
-                                
+                                    .foregroundColor(goal.isChecked ? .green : Color.vermelhoPadrao)
+                                    .onTapGesture {
+                                        // Define as configurações do Pomodoro com os valores da meta
+                                        settingsViewModel.selectedPomodoroTime = goal.pomodoroTimer
+                                        settingsViewModel.selectedRestTime = goal.restTimer
+                                        settingsViewModel.pomodoroCycles = goal.pomodoroCycles
+                                        
+                                        // Muda para a aba do Pomodoro
+                                        selectedTab = 0
+                                    }
+
                                 HStack {
+                                    CheckboxView(isChecked: Binding(
+                                        get: { goal.isChecked },
+                                        set: { newValue in
+                                            goal.isChecked = newValue
+                                            try? context.save()
+                                        }
+                                    ))
+                                    
                                     Text(goal.title)
                                         .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity, alignment: .leading) 
+                                        .frame(maxWidth: .infinity, alignment: .leading)
                                     
                                     Spacer()
                                     
@@ -37,28 +52,26 @@ struct GoalView: View {
                                         }) {
                                             Image(systemName: "trash.circle")
                                                 .font(.system(size: 24))
-                                                .foregroundColor(.white) // Cor do ícone
+                                                .foregroundColor(.white)
                                         }
                                         
                                         NavigationLink(destination: GoalCreateView(goal: goal)) {
                                             Image(systemName: "ellipsis.circle")
                                                 .font(.system(size: 24))
-                                                .foregroundColor(.white) // Cor do ícone
+                                                .foregroundColor(.white)
                                         }
                                     }
                                 }
-                                .padding(.horizontal) // Ajuste o padding conforme necessário
+                                .padding(.horizontal)
                             }
                             .bold()
                             .foregroundStyle(.white)
                             .padding(.vertical, 5)
                         }
-
                     }
-                    
                     Spacer()
                 }
-                .padding(.horizontal) // Ajustando o padding horizontal
+                .padding(.horizontal)
             }
             .toolbar {
                 ToolbarItem(placement: .principal) {
@@ -66,7 +79,6 @@ struct GoalView: View {
                         .font(.title2)
                         .bold()
                 }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: GoalCreateView()) {
                         Image(systemName: "plus")
@@ -76,7 +88,6 @@ struct GoalView: View {
         }
     }
 }
-
 
 struct GoalCreateView: View {
     
@@ -92,10 +103,6 @@ struct GoalCreateView: View {
     @EnvironmentObject private var viewModel: SettingsViewModel
     
     @State var goal: GoalModel?
-    
-    /*if let goal {
-        goal.scheduledDate ? isScheduled = true : isScheduled = false
-    }*/
     
     var body: some View {
         GeometryReader { geometry in
@@ -181,6 +188,7 @@ struct GoalCreateView: View {
                             goal.pomodoroTimer = viewModel.selectedPomodoroTime!
                             goal.restTimer = viewModel.selectedRestTime!
                             goal.pomodoroCycles = viewModel.pomodoroCycles
+                            
                         } else {
                             // Se o usuário optou por agendar, passa a data, caso contrário passa nil
                             let goalModel: GoalModel = GoalModel(
@@ -223,7 +231,7 @@ struct GoalCreateView: View {
 }
 
 #Preview {
-    GoalView()
-        .environmentObject(SettingsViewModel())
-        .modelContainer(for: GoalModel.self)
+    GoalView(selectedTab: .constant(0)) // Passando um Binding válido
+        .environmentObject(SettingsViewModel()) // Injetando o ViewModel
+        .modelContainer(for: GoalModel.self) // Configurando SwiftData
 }
