@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import AVKit
 
 class TimerViewModel: ObservableObject {
     @Published var timeElapsed: Int = 0
@@ -11,6 +12,9 @@ class TimerViewModel: ObservableObject {
     @Published var showAlert: Bool = false
     @Published var isRestTimeAlert: Bool = false
     @Published var showResetConfirmation: Bool = false
+    @Published var isPlaying: Bool = false
+    @Published var player: AVAudioPlayer?
+    let audioFileName: String = "alarm"
     
     private var timer: Timer?
     private var settingsViewModel: SettingsViewModel
@@ -34,7 +38,7 @@ class TimerViewModel: ObservableObject {
             }
         }
     }
-
+    
     func pauseTimer() {
         isRunning = false
         timer?.invalidate()
@@ -61,7 +65,7 @@ class TimerViewModel: ObservableObject {
         isPomodoro = true // ❌ Isso sempre redefine para Pomodoro
         totalTime = (settingsViewModel.selectedPomodoroTime ?? 30) * 60
     }
-
+    
     private func switchMode() {
         if isPomodoro {
             showAlert = true
@@ -69,7 +73,7 @@ class TimerViewModel: ObservableObject {
             isRestTimeAlert = true
         }
     }
-
+    
     func startRestTime() {
         isPomodoro = false
         timeElapsed = 0
@@ -100,5 +104,29 @@ class TimerViewModel: ObservableObject {
         let minutes = remainingTime / 60
         let seconds = remainingTime % 60
         return String(format: "%02d:%02d", minutes, seconds)
+    }
+    
+    private func setupAudioPlayer() {
+        guard let url = Bundle.main.url(forResource: audioFileName, withExtension: "wav") else {
+            print("Audio não encontrado")
+            return
+        }
+        
+        do {
+            player = try AVAudioPlayer(contentsOf: url)
+            player?.prepareToPlay()
+        } catch {
+            print("Erro ao carregar audio: \(error)")
+        }
+    }
+    
+    func playAudio() {
+        player?.play()
+        isPlaying = true
+    }
+    
+    func stopAudio() {
+        player?.pause()
+        isPlaying = false
     }
 }

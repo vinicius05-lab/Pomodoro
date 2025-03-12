@@ -113,6 +113,7 @@ struct TimerPomodoro: View {
             .alert("Tempo de foco acabou!", isPresented: $viewModel.showAlert) {
                 Button("Ok") {
                     viewModel.startRestTime() // Inicia o tempo de descanso após o usuário confirmar
+                    viewModel.stopAudio()
                 }
             } message: {
                 Text("Agora é hora de descansar.")
@@ -120,9 +121,20 @@ struct TimerPomodoro: View {
             .alert("Tempo de descanso acabou!", isPresented: $viewModel.isRestTimeAlert) {
                 Button("Ok") {
                     viewModel.startPomodoro() // Inicia o Pomodoro após o usuário confirmar
+                    viewModel.stopAudio()
                 }
             } message: {
                 Text("Agora é hora de focar novamente.")
+            }
+            .onChange(of: viewModel.showAlert) {
+                if viewModel.showAlert {
+                    viewModel.playAudio() // Toca o som quando o alerta de foco aparece
+                }
+            }
+            .onChange(of: viewModel.isRestTimeAlert) {
+                if viewModel.isRestTimeAlert {
+                    viewModel.playAudio() // Toca o som quando o alerta de descanso aparece
+                }
             }
             
             .toolbar { // 🔹 Adicionando a Toolbar
