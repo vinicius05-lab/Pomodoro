@@ -12,7 +12,15 @@ struct TimerPomodoro: View {
     var body: some View {
         NavigationStack {
             VStack {
+                if let title = settingsViewModel.goalTitle {
+                    Text(title)
+                        .font(.system(size: 20, weight: .bold))
+                        .padding(.bottom, 130)
+                        .padding(.top, -60)
+                }
+                
                 ZStack {
+                    
                     Circle()
                         .stroke(Color.gray.opacity(0.2), lineWidth: 20)
                         .frame(width: 283, height: 282)

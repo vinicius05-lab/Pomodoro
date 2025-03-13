@@ -11,7 +11,7 @@ struct GoalView: View {
     
     @State private var showDeleteConfirmation: Bool = false
     @State private var goalToDelete: GoalModel?
-
+    
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -30,6 +30,8 @@ struct GoalView: View {
                                         settingsViewModel.selectedPomodoroTime = goal.pomodoroTimer
                                         settingsViewModel.selectedRestTime = goal.restTimer
                                         settingsViewModel.pomodoroCycles = goal.pomodoroCycles
+                                        settingsViewModel.goalTitle = goal.title
+                                        settingsViewModel.goal = goal
                                         
                                         // Muda para a aba do Pomodoro
                                         selectedTab = 0
@@ -43,6 +45,7 @@ struct GoalView: View {
                                             try? context.save()
                                         }
                                     ))
+                                    .allowsHitTesting(false)
                                     
                                     Text(goal.title)
                                         .foregroundColor(.white)
@@ -306,6 +309,7 @@ struct GoalCreateView: View {
 }
 
 #Preview {
+    
     GoalView(selectedTab: .constant(0)) // Passando um Binding válido
         .environmentObject(SettingsViewModel()) // Injetando o ViewModel
         .modelContainer(for: GoalModel.self) // Configurando SwiftData

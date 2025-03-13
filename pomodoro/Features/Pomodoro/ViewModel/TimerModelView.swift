@@ -16,6 +16,7 @@ class TimerViewModel: ObservableObject {
     @Published var showResetConfirmation: Bool = false
     @Published var isPlaying: Bool = false
     @Published var player: AVAudioPlayer?
+    
     let audioFileName: String = "alarm"
     var vibrationTimer: Timer?
 
@@ -67,6 +68,10 @@ class TimerViewModel: ObservableObject {
         currentCycle = 1 // ❌ Isso faz com que ele volte ao primeiro ciclo
         isPomodoro = true // ❌ Isso sempre redefine para Pomodoro
         totalTime = (settingsViewModel.selectedPomodoroTime ?? 30) * 60
+        
+        if let goal = settingsViewModel.goal {
+            goal.isChecked = true
+        }
     }
     
     private func switchMode() {
