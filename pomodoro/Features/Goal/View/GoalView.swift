@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UserNotifications
 
 struct GoalView: View {
     @Environment(\.modelContext) private var context
@@ -23,7 +24,7 @@ struct GoalView: View {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 10)
                                     .frame(width: 363, height: 47)
-                                    .foregroundColor(goal.isChecked ? .green : Color.vermelhoPadrao)
+                                    .foregroundColor(goal.isChecked && settingsViewModel.darkMode ? .orange : goal.isChecked && !settingsViewModel.darkMode ? Color.green : Color.vermelhoPadrao)
                                     .onTapGesture {
                                         // Define as configurações do Pomodoro com os valores da meta
                                         settingsViewModel.selectedPomodoroTime = goal.pomodoroTimer
@@ -125,7 +126,7 @@ struct GoalCreateView: View {
                 VStack(alignment: .leading, spacing: 25) {
                     
                     CustomTextField(title: "Title", text: $title)
-                    .padding(.top, -30)
+                        .padding(.top, -30)
                     
                     CustomTextField(title: "Description", text: $descript)
                     
@@ -176,6 +177,8 @@ struct GoalCreateView: View {
                 }
                 .padding()
                 .onAppear {
+                    requestNotificationPermission()
+                    
                     if let goal = goal {
                         title = goal.title
                         descript = goal.descript
@@ -209,13 +212,16 @@ struct GoalCreateView: View {
                             goal.restTimer = viewModel.selectedRestTime!
                             goal.pomodoroCycles = viewModel.pomodoroCycles
                             
+                            if isScheduled {
+                                scheduleNotification(for: goal)
+                            }
+                            
                         } else {
                             if title.isEmpty {
                                 showMessageTitleEmpty = true
                                 return
                             }
                             
-                            // Se o usuário optou por agendar, passa a data, caso contrário passa nil
                             let goalModel: GoalModel = GoalModel(
                                 title: title,
                                 descript: descript,
@@ -226,6 +232,10 @@ struct GoalCreateView: View {
                             )
                             
                             context.insert(goalModel)
+                            
+                            if isScheduled {
+                                scheduleNotification(for: goalModel)
+                            }
                         }
                         
                         dismiss()
@@ -258,6 +268,41 @@ struct GoalCreateView: View {
         }
         .frame(maxWidth: .infinity)
     }
+    
+    func requestNotificationPermission() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            if let error = error {
+                print("Erro ao solicitar permissão: \(error.localizedDescription)")
+            } else {
+                print("Permissão concedida: \(granted)")
+            }
+        }
+    }
+    
+    func scheduleNotification(for goal: GoalModel) {
+        let content = UNMutableNotificationContent()
+        content.title = "Lembrete de Meta 📌"
+        content.body = "Sua meta '\(goal.title)' está programada para agora!"
+        content.sound = .default
+        
+        // Criando o trigger baseado na data definida pelo usuário
+        guard let scheduledDate = goal.scheduledDate else { return }
+        let triggerDate = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: scheduledDate)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: triggerDate, repeats: false)
+        
+        // Criando a requisição da notificação
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        
+        // Adicionando a notificação ao sistema
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Erro ao agendar notificação: \(error.localizedDescription)")
+            } else {
+                print("Notificação agendada para \(scheduledDate)")
+            }
+        }
+    }
+    
 }
 
 #Preview {

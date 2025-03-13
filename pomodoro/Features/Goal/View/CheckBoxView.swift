@@ -13,10 +13,6 @@ struct CheckboxView: View {
                         .foregroundColor(.white)
                         .font(.system(size: 20))
                     
-                    /*Image(systemName: "square")
-                        .foregroundColor(.black)
-                        .font(.system(size: 20))*/
-                    
                    if isChecked {
                         Image(systemName: "checkmark")
                            .foregroundColor(.vermelhoPadrao)

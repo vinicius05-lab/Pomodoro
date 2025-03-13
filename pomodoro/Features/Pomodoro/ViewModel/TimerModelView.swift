@@ -1,6 +1,8 @@
 import Foundation
 import SwiftUI
 import AVKit
+import CoreHaptics
+import AVFoundation
 
 class TimerViewModel: ObservableObject {
     @Published var timeElapsed: Int = 0
@@ -15,7 +17,8 @@ class TimerViewModel: ObservableObject {
     @Published var isPlaying: Bool = false
     @Published var player: AVAudioPlayer?
     let audioFileName: String = "alarm"
-    
+    var vibrationTimer: Timer?
+
     private var timer: Timer?
     private var settingsViewModel: SettingsViewModel
     
@@ -107,7 +110,7 @@ class TimerViewModel: ObservableObject {
     }
     
     private func setupAudioPlayer() {
-        guard let url = Bundle.main.url(forResource: audioFileName, withExtension: "wav") else {
+        guard let url = Bundle.main.url(forResource: "alarm", withExtension: "wav") else {
             print("Audio não encontrado")
             return
         }
@@ -129,4 +132,19 @@ class TimerViewModel: ObservableObject {
         player?.pause()
         isPlaying = false
     }
+    
+    func startVibrating() {
+        stopVibrating()
+        if settingsViewModel.vibrate {
+            vibrationTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+                AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+            }
+        }
+    }
+
+    func stopVibrating() {
+        vibrationTimer?.invalidate()
+        vibrationTimer = nil
+    }
+    
 }
