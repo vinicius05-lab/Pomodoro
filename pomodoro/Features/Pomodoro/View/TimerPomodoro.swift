@@ -1,13 +1,13 @@
 import SwiftUI
 
 struct TimerPomodoro: View {
-    @StateObject private var viewModel: TimerViewModel
+    @EnvironmentObject private var viewModel: TimerViewModel
 
     @EnvironmentObject var settingsViewModel: SettingsViewModel
 
-    init(minutes: Int = 30, seconds: Int = 0, settingsViewModel: SettingsViewModel) {
+    /*init(minutes: Int = 30, seconds: Int = 0, settingsViewModel: SettingsViewModel) {
         _viewModel = StateObject(wrappedValue: TimerViewModel(minutes: minutes, seconds: seconds, settingsViewModel: settingsViewModel))
-    }
+    }*/
     
     var body: some View {
         NavigationStack {
@@ -112,8 +112,11 @@ struct TimerPomodoro: View {
                 .foregroundStyle(.vermelhoPadrao)
             }
             .onAppear {
-                let minutes = settingsViewModel.selectedPomodoroTime ?? 30
-                viewModel.updateTime(minutes: minutes)
+                if settingsViewModel.goal != nil && viewModel.isRunning == false {
+                                    if let minutes = settingsViewModel.selectedPomodoroTime{
+                                        viewModel.updateTime(minutes: minutes)
+                                    }
+                                }
             }
             .onChange(of: settingsViewModel.pomodoroCycles) { _, newValue in
                 viewModel.totalCycles = newValue
@@ -165,6 +168,7 @@ struct TimerPomodoro: View {
 }
 
 #Preview {
-    TimerPomodoro(settingsViewModel: SettingsViewModel())
+    TimerPomodoro(/*settingsViewModel: SettingsViewModel()*/)
+        .environmentObject(TimerViewModel(minutes: 30, seconds: 0, settingsViewModel: SettingsViewModel()))
         .environmentObject(SettingsViewModel())
 }

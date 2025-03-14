@@ -10,4 +10,5 @@ class SettingsViewModel: ObservableObject {
     @Published var pomodoroCycles: Int = 2
     @Published var goalTitle: String?
     @Published var goal: GoalModel?
+    @Published var savedSettings: Bool = false
 }

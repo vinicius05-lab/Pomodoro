@@ -1,7 +1,9 @@
 import SwiftUI
 
 struct TabBarView: View {
-    @StateObject private var settingsViewModel = SettingsViewModel() // Cria a instância do ViewModel
+    //@StateObject private var settingsViewModel = SettingsViewModel() // Cria a instância do ViewModel
+    
+    @StateObject private var timerViewModel: TimerViewModel = TimerViewModel(minutes: 30, seconds: 0, settingsViewModel: SettingsViewModel())
     
     @State private var selectedTab = 0
     
@@ -18,7 +20,7 @@ struct TabBarView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-                    TimerPomodoro(settingsViewModel: settingsViewModel)
+            TimerPomodoro(/*settingsViewModel: timerViewModel.settingsViewModel*/)
                         .tabItem {
                             Label("Pomodoro", systemImage: "play.circle.fill")
                         }
@@ -36,9 +38,9 @@ struct TabBarView: View {
                     }
                     .tag(2)
         }
-        
-        .environmentObject(settingsViewModel)
-        .preferredColorScheme(settingsViewModel.darkMode ? .dark : .light)
+        .environmentObject(timerViewModel)
+        .environmentObject(timerViewModel.settingsViewModel)
+        .preferredColorScheme(timerViewModel.settingsViewModel.darkMode ? .dark : .light)
     }
 }
 

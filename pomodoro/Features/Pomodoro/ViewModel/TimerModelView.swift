@@ -21,7 +21,7 @@ class TimerViewModel: ObservableObject {
     var vibrationTimer: Timer?
 
     private var timer: Timer?
-    private var settingsViewModel: SettingsViewModel
+    var settingsViewModel: SettingsViewModel
     
     init(minutes: Int, seconds: Int, settingsViewModel: SettingsViewModel) {
         self.totalTime = (minutes * 60) + seconds
@@ -105,6 +105,7 @@ class TimerViewModel: ObservableObject {
     func updateTime(minutes: Int) {
         totalTime = minutes * 60
         timeElapsed = 0
+        
     }
     
     func formatTime() -> String {
@@ -115,7 +116,7 @@ class TimerViewModel: ObservableObject {
     }
     
     private func setupAudioPlayer() {
-        guard let url = Bundle.main.url(forResource: "alarm", withExtension: "wav") else {
+        guard let url = Bundle.main.url(forResource: audioFileName, withExtension: "wav") else {
             print("Audio não encontrado")
             return
         }
@@ -131,11 +132,14 @@ class TimerViewModel: ObservableObject {
     func playAudio() {
         player?.play()
         isPlaying = true
+        
+        print("Audio tocado")
     }
     
     func stopAudio() {
         player?.pause()
         isPlaying = false
+        print("Audio sendo interrompido")
     }
     
     func startVibrating() {
@@ -143,6 +147,7 @@ class TimerViewModel: ObservableObject {
         if settingsViewModel.vibrate {
             vibrationTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
                 AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+                //print("Celular vibrando")
             }
         }
     }
@@ -150,6 +155,7 @@ class TimerViewModel: ObservableObject {
     func stopVibrating() {
         vibrationTimer?.invalidate()
         vibrationTimer = nil
+        //print("Vibração interrompida")
     }
     
 }

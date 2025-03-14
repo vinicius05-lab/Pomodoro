@@ -7,10 +7,14 @@ struct GoalView: View {
     @Query var goals: [GoalModel]
     
     @EnvironmentObject private var settingsViewModel: SettingsViewModel
+    @EnvironmentObject private var timerViewModel: TimerViewModel
+    
     @Binding var selectedTab: Int // Adicione um Binding para a aba ativa
     
     @State private var showDeleteConfirmation: Bool = false
     @State private var goalToDelete: GoalModel?
+    
+    @State private var showAlert: Bool = false
     
     var body: some View {
         NavigationStack {
@@ -26,15 +30,19 @@ struct GoalView: View {
                                     .frame(width: 363, height: 47)
                                     .foregroundColor(goal.isChecked && settingsViewModel.darkMode ? .orange : goal.isChecked && !settingsViewModel.darkMode ? Color.green : Color.vermelhoPadrao)
                                     .onTapGesture {
-                                        // Define as configurações do Pomodoro com os valores da meta
-                                        settingsViewModel.selectedPomodoroTime = goal.pomodoroTimer
-                                        settingsViewModel.selectedRestTime = goal.restTimer
-                                        settingsViewModel.pomodoroCycles = goal.pomodoroCycles
-                                        settingsViewModel.goalTitle = goal.title
-                                        settingsViewModel.goal = goal
-                                        
-                                        // Muda para a aba do Pomodoro
-                                        selectedTab = 0
+                                       if timerViewModel.isRunning {
+                                            showAlert = true
+                                       } else {
+                                            // Define as configurações do Pomodoro com os valores da meta
+                                            settingsViewModel.selectedPomodoroTime = goal.pomodoroTimer
+                                            settingsViewModel.selectedRestTime = goal.restTimer
+                                            settingsViewModel.pomodoroCycles = goal.pomodoroCycles
+                                            settingsViewModel.goalTitle = goal.title
+                                            settingsViewModel.goal = goal
+                                            
+                                            // Muda para a aba do Pomodoro
+                                            selectedTab = 0
+                                        }
                                     }
 
                                 HStack {
@@ -103,6 +111,14 @@ struct GoalView: View {
                     try? context.save()
                 }
             }
+        }
+        .alert("Tempo Rodando!", isPresented: $showAlert) {
+            Button("Cancelar", role: .cancel) {}
+            Button("Ok") {
+                selectedTab = 0
+            }
+        } message: {
+            Text("Reinicie ou pause o tempo atual para inciar a meta")
         }
     }
 }
@@ -311,6 +327,7 @@ struct GoalCreateView: View {
 #Preview {
     
     GoalView(selectedTab: .constant(0)) // Passando um Binding válido
+        .environmentObject(TimerViewModel(minutes: 30, seconds: 0, settingsViewModel: SettingsViewModel()))
         .environmentObject(SettingsViewModel()) // Injetando o ViewModel
         .modelContainer(for: GoalModel.self) // Configurando SwiftData
 }
