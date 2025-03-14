@@ -9,7 +9,7 @@ struct SettingsView: View {
     @State private var tempSelectedRestTime: Int?
     @State private var tempPomodoroCycles: Int
     @State private var tempVolume: Double
-    @State private var tempDarkMode: Bool
+    @AppStorage("darkMode") private var tempDarkMode: Bool = false
     @State private var tempVibrate: Bool
     @State private var tempSelectedSound: String
     @State private var showAlert: Bool = false
@@ -19,7 +19,6 @@ struct SettingsView: View {
         _tempSelectedRestTime = State(initialValue: 5)
         _tempPomodoroCycles = State(initialValue: 2)
         _tempVolume = State(initialValue: 0.5)
-        _tempDarkMode = State(initialValue: false)
         _tempVibrate = State(initialValue: true)
         _tempSelectedSound = State(initialValue: "Alarme.mp3")
     }
@@ -122,6 +121,8 @@ struct SettingsView: View {
             .alert("Tem certeza que deseja salvar as alterações?", isPresented: $showAlert) {
                 Button("Cancelar", role: .cancel) {}
                 Button("Salvar", role: .destructive) { salvarConfiguracoes() }
+            } message: {
+                Text("As alterações feitas vão alterar o estado atual da aplicação.")
             }
         }
     }

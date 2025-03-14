@@ -133,11 +133,17 @@ struct GoalCreateView: View {
     @State private var scheduledDate: Date = Date()
     @State private var isScheduled: Bool = false // Variável para controlar a caixa de seleção
     @State private var showMessageTitleEmpty: Bool = false
+    @State private var showMessageRepeatedTitleEmpty: Bool = false
+    
+    @EnvironmentObject private var settingsViewModel: SettingsViewModel
+    @EnvironmentObject private var timerViewModel: TimerViewModel
+    @State private var showAlert: Bool = false
     
     private let model = SettingsModel()
     @EnvironmentObject private var viewModel: SettingsViewModel
     
     @State var goal: GoalModel?
+    @Query var goals: [GoalModel]
     
     var body: some View {
         GeometryReader { geometry in
@@ -218,12 +224,20 @@ struct GoalCreateView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
                         
+                        if settingsViewModel.goal == goal && timerViewModel.isRunning {
+                            showAlert = true
+                            return
+                        }
+                        
                         if title.isEmpty {
                             showMessageTitleEmpty = true
                             return
                         }
                         
+                        let response: Bool = repeatedTitle(title)
+                        
                         if let goal = goal {
+                            
                             goal.title = title
                             goal.descript = descript
                             goal.scheduledDate = isScheduled ? scheduledDate : nil
@@ -236,8 +250,9 @@ struct GoalCreateView: View {
                             }
                             
                         } else {
-                            if title.isEmpty {
-                                showMessageTitleEmpty = true
+                            
+                            if response {
+                                showMessageRepeatedTitleEmpty = true
                                 return
                             }
                             
@@ -268,8 +283,19 @@ struct GoalCreateView: View {
             } message: {
                 Text("Por favor, preencha o título antes de salvar")
             }
+            .alert("Tempo Rodando!", isPresented: $showAlert) {
+                Button("Cancelar", role: .cancel) {}
+                Button("Ok", role: .cancel) {}
+            } message: {
+                Text("Reinicie ou pause o tempo atual para salvar as alterações da meta")
+            }
         }
     }
+    
+    private func repeatedTitle(_ title: String) -> Bool {
+        return goals.contains { $0.title == title }
+    }
+
     
     private func createTimeSelectionRow(times: [Int], width: CGFloat, selectedTime: Binding<Int?>) -> some View {
         HStack(spacing: 16) {
