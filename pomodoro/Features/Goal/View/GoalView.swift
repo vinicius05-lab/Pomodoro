@@ -137,9 +137,6 @@ struct GoalCreateView: View {
     private let model = SettingsModel()
     @EnvironmentObject private var viewModel: SettingsViewModel
     
-    @EnvironmentObject private var timerViewModel: TimerViewModel
-    @State private var showAlert2: Bool = false
-    
     @State var goal: GoalModel?
     @State var showAlert: Bool = false
     
@@ -229,11 +226,6 @@ struct GoalCreateView: View {
                             return
                         }
                         
-                        if viewModel.goal == goal && timerViewModel.isRunning {
-                                showAlert2 = true
-                                return
-                        }
-
                         let response = repeatedTitle(title)
                         
                         if let goal = goal {
@@ -287,13 +279,6 @@ struct GoalCreateView: View {
             } message: {
                 Text("Por favor, preencha um título diferente")
             }
-            .alert("Tempo Rodando!", isPresented: $showAlert2) {
-                            Button("Cancelar", role: .cancel) {}
-                            Button("Ok", role: .cancel) {}
-                        } message: {
-                            Text("Reinicie ou pause o tempo atual para salvar as alterações da meta")
-                        }
-
         }
     }
     
